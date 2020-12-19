@@ -14,7 +14,7 @@ Devise.setup do |config|
   # confirmation, reset password and unlock tokens in the database.
   # Devise will use the `secret_key_base` as its `secret_key`
   # by default. You can change it below and use your own secret key.
-  config.secret_key = Rails.application.credentials.aws[:secret_access_key]
+  config.secret_key = Rails.application.credentials.config[:secret_key_base]
 
   # ==> Controller configuration
   # Configure the parent class to the devise controllers.
@@ -264,6 +264,7 @@ Devise.setup do |config|
   #
   # The "*/*" below is required to match Internet Explorer requests.
   # config.navigational_formats = ['*/*', :html]
+  config.navigational_formats = []
 
   # The default HTTP method used to sign out a resource. Default is :delete.
   config.sign_out_via = :delete
@@ -309,7 +310,15 @@ Devise.setup do |config|
   # changed. Defaults to true, so a user is signed in automatically after changing a password.
   # config.sign_in_after_change_password = true
 
+  # Configure devise-jwt
   config.jwt do |jwt|
-    jwt.secret = Rails.application.credentials.aws[:devise_secret_access_key]
+      jwt.secret = Rails.application.credentials.config[:devise_jwt_secret_key]
+      jwt.dispatch_requests = [
+        ['POST', %r{^/login$}]
+      ]
+      jwt.revocation_requests = [
+        ['DELETE', %r{^/logout$}]
+      ]
+      jwt.expiration_time = 30.minutes.to_i
   end
 end
